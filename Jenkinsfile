@@ -1,56 +1,22 @@
 pipeline {
     agent any
-    environment{
-        APPNAME = 'node-app-demo'
-        REGISTRY = 'enardelg'
+    environment {
         DOCKER_HUB_LOGIN = credentials('pin1')
+        REGISTRY = 'enardelg'
     }
-    stages { // el principal donde se arman la tuberia 
-        //CI
-        stage('Init') {
-            agent{
-                docker {
-                    image 'node:erbium-alpine'
-                    args '-u root:root'
-                }
-            }
+        stage('docker build') {
             steps {
-                echo "Init"
-                sh 'npm install'
+                sh 'docker build -t node-devops-git:v1 .'
             }
         }
-        stage('Test') {
-            agent{
-                docker {
-                    image 'node:erbium-alpine'
-                    args '-u root:root'
-                }
-            }
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                sh 'npm run test'
-                }
-            }
-        }
-        stage('Build') {
-            steps {
-                sh 'docker build -t $APPNAME:latest .'
-                sh 'docker tag $APPNAME:latest $REGISTRY/$APPNAME:latest'
-
-            }
-        }
-        // CD
         stage('Deploy') {
             steps {
-                echo 'Docker Login'
-                sh 'docker login --username=$DOCKER_HUB_LOGIN_USR --password=$DOCKER_HUB_LOGIN_PSW'
-                sh 'docker push $REGISTRY/$APPNAME:latest'
+                sh '''
+                    docker login --username=$DOCKER_HUB_LOGIN_USR --password=$DOCKER_HUB_LOGIN_PSW
+                    docker tag node-devops-git:v1 $REGISTRY/node-devops-git:v1
+                    docker push $REGISTRY/node-devops-git:v1
+                '''
             }
         }
-        stage('Notificaction') {
-            steps {
-                echo 'Telegram/slack/discord/team-...'
-            }
-        } 
     }
 }
