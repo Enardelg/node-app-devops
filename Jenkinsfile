@@ -1,56 +1,53 @@
 pipeline {
     agent any
-    environment{
-        APPNAME = 'node-app-demo'
-        REGISTRY = 'enardelg'
+    environment {
         DOCKER_HUB_LOGIN = credentials('pin1')
+        REGISTRY = 'enardelg'
+        IMAGE = 'node-devops-auto'
     }
-    stages { // el principal donde se arman la tuberia 
-        //CI
-        stage('Init') {
-            agent{
+     stages {
+         
+        stage('Init'){
+            agent {
                 docker {
-                    image 'node:erbium-alpine'
+                    image 'node:alpine'
                     args '-u root:root'
                 }
             }
             steps {
-                echo "Init"
                 sh 'npm install'
             }
         }
-        stage('Test') {
-            agent{
+
+        stage('Test'){
+            agent {
                 docker {
-                    image 'node:erbium-alpine'
+                    image 'node:alpine'
                     args '-u root:root'
                 }
             }
             steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                 sh 'npm run test'
-                }
             }
         }
-        stage('Build') {
+         
+        stage('docker build') {
             steps {
-                sh 'docker build -t $APPNAME:latest .'
-                sh 'docker tag $APPNAME:latest $REGISTRY/$APPNAME:latest'
-
+                sh '''
+                    VERSION=$(jq --raw-output .version package.json)
+                    echo $VERSION >version.txt
+                    docker build -t $IMAGE:$(cat version.txt)
+                '''
             }
         }
-        // CD
         stage('Deploy') {
             steps {
-                echo 'Docker Login'
-                sh 'docker login --username=$DOCKER_HUB_LOGIN_USR --password=$DOCKER_HUB_LOGIN_PSW'
-                sh 'docker push $REGISTRY/$APPNAME:latest'
+                sh '''
+                    docker login --username=$DOCKER_HUB_LOGIN_USR --password=$DOCKER_HUB_LOGIN_PSW
+                    docker tag $IMAGE:$(cat version.txt) $REGISTRY/$IMAGE:$(cat version.txt)
+                    docker push $REGISTRY/$IMAGE:$(cat version.txt)
+                '''
             }
         }
-        stage('Notificaction') {
-            steps {
-                echo 'Telegram/slack/discord/team-...'
-            }
-        } 
     }
 }
