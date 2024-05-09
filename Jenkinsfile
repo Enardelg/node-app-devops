@@ -35,7 +35,9 @@ pipeline {
             steps {
                 sh '''
                     VERSION=$(jq --raw-output .version package.json)
-                    echo $VERSION >version.txt
+                    echo "Version: $VERSION"
+                    echo "Image: $IMAGE"
+                    echo $VERSION > version.txt
                     docker build -t $IMAGE:$(cat version.txt)
                 '''
             }
