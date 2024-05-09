@@ -4,6 +4,7 @@ pipeline {
         DOCKER_HUB_LOGIN = credentials('pin1')
         REGISTRY = 'enardelg'
     }
+     stages {
         stage('docker build') {
             steps {
                 sh 'docker build -t node-devops-git:v1 .'
