@@ -38,7 +38,7 @@ pipeline {
                     echo "Version: $VERSION"
                     echo "Image: $IMAGE"
                     echo $VERSION > version.txt
-                    docker build -t $IMAGE:$(cat version.txt)
+                    docker build -t $IMAGE:$(cat version.txt) .
                 '''
             }
         }
