@@ -3,7 +3,7 @@ pipeline {
     environment{
         APPNAME = 'node-app-demo'
         REGISTRY = 'enardelg'
-        DOCKER_HUB_LOGIN = credentials('docker-hub')
+        DOCKER_HUB_LOGIN = credentials('pin1')
     }
     stages { // el principal donde se arman la tuberia 
         //CI
