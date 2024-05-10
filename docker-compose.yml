@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  backend:
+    container_name: node
+    image: REGISTRY/APP_NAME:TAG
+    ports:
+    - "3000:3000"
