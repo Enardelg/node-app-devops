@@ -64,14 +64,21 @@ pipeline {
             }
         }
 
-        stage('Deploy to AWS') {
-            steps {
-               sshagent(['aws-ssh']){
-                   sh 'scp -o StricHostKeyChecking=no docker-compose.yml $SERVER:/home/ec2-user'
-                   sh 'ssh $SERVER ls -lrt'
-                   sh 'ssh $SERVER docker-compose up -d'
-               }
+       stage('Deploy to AWS') {
+          steps {
+    // Assuming the SSH key credentials are stored securely in Jenkins using the Credentials Plugin
+           
+              withCredentials([ssh(fileId: 'aws-ssh', username: 'ec2-user')]) {
+      // Enable strict host key checking for secure connection
+                  sh 'scp -o StrictHostKeyChecking=yes docker-compose.yml ec2-user@54.163.44.87:/home/ec2-user'
+
+      // Verify successful transfer before proceeding
+                  sh 'ssh ec2-user@54.163.44.87 ls -lrt docker-compose.yml' // Check if the file exists
+
+      // Execute docker-compose up -d on the remote server
+                  sh 'ssh ec2-user@54.163.44.87 docker-compose up -d'
+                }
+              }
             }
-        }
     }
 }
