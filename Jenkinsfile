@@ -64,7 +64,7 @@ pipeline {
             }
         }
 
-        stage('Update docker-compose') {
+        stage('Deploy to AWS') {
             steps {
                sshagent(['aws-ssh']){
                    sh 'scp -o StricHostKeyChecking=no docker-compose.yml $SERVER:/home/ec2-user'
