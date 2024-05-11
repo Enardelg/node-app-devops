@@ -4,6 +4,7 @@ pipeline {
         DOCKER_HUB_LOGIN = credentials('pin1')
         REGISTRY = 'enardelg'
         IMAGE = 'node-devops-auto'
+        SERVER = 'ec2-user@ec2-54-163-44-87'
     }
      stages {
          
@@ -60,6 +61,16 @@ pipeline {
                    sed -i -- "s/TAG/$(cat version.txt)/g" docker-compose.yml
                    cat docker-compose.yml
                 '''
+            }
+        }
+
+        stage('Update docker-compose') {
+            steps {
+               sshagent(['aws-ssh']){
+                   sh 'scp -o StricHostKeyChecking=no docker-compose.yml $SERVER:/home/ec2-user'
+                   sh 'ssh $SERVER ls -lrt'
+                   sh 'ssh $SERVER docker-compose up -d'
+               }
             }
         }
     }
