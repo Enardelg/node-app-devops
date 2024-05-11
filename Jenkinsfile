@@ -4,7 +4,7 @@ pipeline {
         DOCKER_HUB_LOGIN = credentials('pin1')
         REGISTRY = 'enardelg'
         IMAGE = 'node-devops-auto'
-        SERVER = 'ec2-user@ec2-54-163-44-87'
+        SERVER = 'ec2-user@54.163.44.87'
     }
      stages {
          
